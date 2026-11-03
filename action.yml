@@ -1,0 +1,47 @@
+name: Clean up Railway preview environments
+description: Delete the GitHub environments Railway creates for a pull request's preview environment.
+author: lachieh
+
+branding:
+  icon: trash-2
+  color: purple
+
+inputs:
+  token:
+    description: Token with Administration write on the repository.
+    required: true
+  pr-number:
+    description: Pull request whose environments to delete.
+    required: false
+    default: ${{ github.event.pull_request.number }}
+  repository:
+    description: Owner and repository name.
+    required: false
+    default: ${{ github.repository }}
+  railway-project:
+    description: When set, only delete environments whose name starts with exactly "<railway-project> / ".
+    required: false
+    default: ''
+  dry-run:
+    description: Set to "true" to list the environments that would be deleted without deleting them.
+    required: false
+    default: 'false'
+
+outputs:
+  deleted:
+    description: Newline-separated names of the deleted environments. In a dry run, the names that would be deleted.
+    value: ${{ steps.delete.outputs.deleted }}
+
+runs:
+  using: composite
+  steps:
+    - name: Delete the pull request's environments
+      id: delete
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+        REPOSITORY: ${{ inputs.repository }}
+        RAILWAY_PROJECT: ${{ inputs.railway-project }}
+        DRY_RUN: ${{ inputs.dry-run }}
+      run: '"${{ github.action_path }}/delete.sh"'

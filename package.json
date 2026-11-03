@@ -1,0 +1,8 @@
+{
+  "name": "gha-cleanup-railway-preview-environment",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/"
+  }
+}
