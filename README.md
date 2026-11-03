@@ -4,7 +4,7 @@ A GitHub Action that deletes the GitHub environments Railway creates for a pull 
 
 ## Why it exists
 
-Railway's GitHub app posts a GitHub deployment for every PR environment, and GitHub turns each deployment into a repository environment. Railway tears down its own PR environment when the pull request closes, but it does nothing on the GitHub side. The repository environments pile up. One repository collected 260 of them before anyone noticed.
+Railway's GitHub app posts a GitHub deployment for every PR environment, and GitHub turns each deployment into a repository environment. Railway tears down its own PR environment when the pull request closes, but it does nothing on the GitHub side. These repository environments pile up. I had over 800 environments on a single repo at one point.
 
 These environments give you nothing in return. They have no protection rules, secrets, or approvals. They hold a deployment record and a link, and Railway's pull request comment already carries that link.
 
@@ -58,7 +58,7 @@ jobs:
           pr-number: ${{ github.event.pull_request.number || inputs.pr_number }}
 ```
 
-`pull_request_target` runs from the default branch and has access to secrets. That is safe here because the job runs no pull request code. The action needs no checkout, so the example has none. Do not add one.
+`pull_request_target` runs from the default branch and has access to secrets. That is safe here because the job runs no pull request code.
 
 ## Inputs
 
