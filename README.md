@@ -4,7 +4,7 @@ A GitHub Action that deletes the GitHub environments Railway creates for a pull 
 
 ## Why it exists
 
-Railway's GitHub app posts a GitHub deployment for every PR environment, and GitHub turns each deployment into a repository environment. Railway tears down its own PR environment when the pull request closes, but it does nothing on the GitHub side. The repository environments pile up. One repository collected 260.
+Railway's GitHub app posts a GitHub deployment for every PR environment, and GitHub turns each deployment into a repository environment. Railway tears down its own PR environment when the pull request closes, but it does nothing on the GitHub side. The repository environments pile up. One repository collected 260 of them before anyone noticed.
 
 These environments give you nothing in return. They have no protection rules, secrets, or approvals. They hold a deployment record and a link, and Railway's pull request comment already carries that link.
 
@@ -12,8 +12,8 @@ These environments give you nothing in return. They have no protection rules, se
 
 Railway names the environments in one of two formats:
 
-- `<railway project> / <name>-pr-<number>`, for example `buildy / charming-pr-7251`
-- `<railway project> / pr-<hash>-<number>`, for example `buildy / pr-189c05-7251`
+- `<railway project> / <name>-pr-<number>`, for example `my-project / web-pr-42`
+- `<railway project> / pr-<hash>-<number>`, for example `my-project / pr-189c05-42`
 
 The action deletes the environments in those formats that end in the pull request's number. It never touches anything else: `production`, `staging`, and environments from other providers stay. The number must match whole, so pull request 7 never matches `pr-17`.
 
