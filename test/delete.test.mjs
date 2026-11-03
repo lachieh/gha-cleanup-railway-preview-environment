@@ -74,26 +74,26 @@ if (args[0] === 'api' && args[1] === 'repos/fixture/repo/environments') {
 
 const path = (encoded) => `repos/fixture/repo/environments/${encoded}`;
 const keep = [
-  'buildy / charming-pr-17251',
-  'buildy / charming-pr-72510',
-  'buildy / production',
-  'buildy / staging',
-  'Preview – charming-www',
+  'acme / web-pr-17251',
+  'acme / web-pr-72510',
+  'acme / production',
+  'acme / staging',
+  'Preview – web-www',
 ];
 
 describe('cleanup-railway-preview-environment', () => {
   it('deletes both Railway name formats for the pull request and nothing else', () => {
     const result = run({
-      environments: [...keep, 'buildy / charming-pr-7251', 'buildy / pr-189c05-7251'],
+      environments: [...keep, 'acme / web-pr-7251', 'acme / pr-189c05-7251'],
     });
     assert.equal(result.status, 0);
     assert.deepEqual(result.deletes, [
-      path('buildy%20%2F%20charming-pr-7251'),
-      path('buildy%20%2F%20pr-189c05-7251'),
+      path('acme%20%2F%20web-pr-7251'),
+      path('acme%20%2F%20pr-189c05-7251'),
     ]);
     assert.equal(
       result.output,
-      'deleted<<EOF\nbuildy / charming-pr-7251\nbuildy / pr-189c05-7251\nEOF\n',
+      'deleted<<EOF\nacme / web-pr-7251\nacme / pr-189c05-7251\nEOF\n',
     );
   });
 
@@ -113,7 +113,7 @@ describe('cleanup-railway-preview-environment', () => {
 
   for (const pr of ['0', 'abc', '-5', '12a']) {
     it(`rejects pull request number ${pr} before calling gh`, () => {
-      const result = run({ pr, environments: ['buildy / charming-pr-0'] });
+      const result = run({ pr, environments: ['acme / web-pr-0'] });
       assert.notEqual(result.status, 0);
       assert.deepEqual(result.calls, []);
     });
@@ -127,41 +127,41 @@ describe('cleanup-railway-preview-environment', () => {
 
   it('counts an already-deleted environment as deleted and continues', () => {
     const result = run({
-      environments: ['buildy / charming-pr-7251', 'buildy / pr-189c05-7251'],
-      deleteStatus: { 'buildy%20%2F%20charming-pr-7251': 404 },
+      environments: ['acme / web-pr-7251', 'acme / pr-189c05-7251'],
+      deleteStatus: { 'acme%20%2F%20web-pr-7251': 404 },
     });
     assert.equal(result.status, 0);
     assert.equal(result.deletes.length, 2);
     assert.equal(
       result.output,
-      'deleted<<EOF\nbuildy / charming-pr-7251\nbuildy / pr-189c05-7251\nEOF\n',
+      'deleted<<EOF\nacme / web-pr-7251\nacme / pr-189c05-7251\nEOF\n',
     );
   });
 
   it('continues past a server error and exits non-zero', () => {
     const result = run({
-      environments: ['buildy / charming-pr-7251', 'buildy / pr-189c05-7251'],
-      deleteStatus: { 'buildy%20%2F%20charming-pr-7251': 500 },
+      environments: ['acme / web-pr-7251', 'acme / pr-189c05-7251'],
+      deleteStatus: { 'acme%20%2F%20web-pr-7251': 500 },
     });
     assert.notEqual(result.status, 0);
     assert.equal(result.deletes.length, 2);
-    assert.equal(result.output, 'deleted<<EOF\nbuildy / pr-189c05-7251\nEOF\n');
+    assert.equal(result.output, 'deleted<<EOF\nacme / pr-189c05-7251\nEOF\n');
   });
 
   it('with railway-project set, deletes only that project and keeps others', () => {
     const result = run({
-      project: 'buildy',
-      environments: ['other / charming-pr-7251', 'buildy / charming-pr-7251'],
+      project: 'acme',
+      environments: ['other / web-pr-7251', 'acme / web-pr-7251'],
     });
     assert.equal(result.status, 0);
-    assert.deepEqual(result.deletes, [path('buildy%20%2F%20charming-pr-7251')]);
-    assert.equal(result.output, 'deleted<<EOF\nbuildy / charming-pr-7251\nEOF\n');
+    assert.deepEqual(result.deletes, [path('acme%20%2F%20web-pr-7251')]);
+    assert.equal(result.output, 'deleted<<EOF\nacme / web-pr-7251\nEOF\n');
   });
 
   it('does not match a project that merely starts with the given name', () => {
     const result = run({
-      project: 'buildy',
-      environments: ['buildy-two / charming-pr-7251'],
+      project: 'acme',
+      environments: ['acme-two / web-pr-7251'],
     });
     assert.equal(result.status, 0);
     assert.deepEqual(result.deletes, []);
@@ -170,24 +170,24 @@ describe('cleanup-railway-preview-environment', () => {
   it('matches a project name with regex characters literally', () => {
     const result = run({
       project: 'a.c+',
-      environments: ['abcc / charming-pr-7251', 'a.c+ / charming-pr-7251'],
+      environments: ['abcc / web-pr-7251', 'a.c+ / web-pr-7251'],
     });
     assert.equal(result.status, 0);
-    assert.deepEqual(result.deletes, [path('a.c%2B%20%2F%20charming-pr-7251')]);
-    assert.equal(result.output, 'deleted<<EOF\na.c+ / charming-pr-7251\nEOF\n');
+    assert.deepEqual(result.deletes, [path('a.c%2B%20%2F%20web-pr-7251')]);
+    assert.equal(result.output, 'deleted<<EOF\na.c+ / web-pr-7251\nEOF\n');
   });
 
   it('in a dry run, makes no DELETE calls and outputs the names it would delete', () => {
     const result = run({
       dryRun: 'true',
-      environments: [...keep, 'buildy / charming-pr-7251', 'buildy / pr-189c05-7251'],
+      environments: [...keep, 'acme / web-pr-7251', 'acme / pr-189c05-7251'],
     });
     assert.equal(result.status, 0);
     assert.deepEqual(result.deletes, []);
-    assert.match(result.stdout, /Would delete buildy \/ charming-pr-7251/);
+    assert.match(result.stdout, /Would delete acme \/ web-pr-7251/);
     assert.equal(
       result.output,
-      'deleted<<EOF\nbuildy / charming-pr-7251\nbuildy / pr-189c05-7251\nEOF\n',
+      'deleted<<EOF\nacme / web-pr-7251\nacme / pr-189c05-7251\nEOF\n',
     );
   });
 });
